@@ -1,4 +1,5 @@
-﻿using MyNoSqlServer.Abstractions;
+﻿using Microsoft.AspNetCore.WebUtilities;
+using MyNoSqlServer.Abstractions;
 
 namespace MyJetWallet.AppVersions;
 
@@ -6,8 +7,14 @@ public class AppVersionsNoSql: MyNoSqlDbEntity
 {
     public const string TableName = "myjetwallet-appversions";
 
+    public enum Platforms
+    {
+        IOS = 0,
+        Android =1
+    }
+    
     public static string GeneratePartitionKey() => "appVersions";
-    public static string GenerateRowKey() => "appVersions";
+    public static string GenerateRowKey(Platforms platform) => platform.ToString();
     
     public uint MinVersion1 { get; set; }
     public uint MinVersion2 { get; set; }
@@ -17,7 +24,7 @@ public class AppVersionsNoSql: MyNoSqlDbEntity
     public uint RecommendVersion2 { get; set; }
     public uint RecommendVersion3 { get; set; }
 
-    public static AppVersionsNoSql Create(string minVersion, string recommendVersion)
+    public static AppVersionsNoSql Create(Platforms platform, string minVersion, string recommendVersion)
     {
         var minVersionNum = ParseVersion(minVersion);
         var recommendVersionNum = ParseVersion(recommendVersion);
@@ -25,7 +32,7 @@ public class AppVersionsNoSql: MyNoSqlDbEntity
         var entity = new AppVersionsNoSql()
         {
             PartitionKey = GeneratePartitionKey(),
-            RowKey = GenerateRowKey(),
+            RowKey = GenerateRowKey(platform),
             
             MinVersion1 = minVersionNum.Item1,
             MinVersion2 = minVersionNum.Item2,
